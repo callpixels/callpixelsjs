@@ -12,7 +12,7 @@
         "excludePattern": "(^|\\/|\\\\)_"
     },
     "opts": {
-        "destination": "./vendor/public/documentation/javascript/v1/"
+        "destination": "./vendor/documentation/javascripts/v1/"
     },
     "plugins": [],
     "templates": {
