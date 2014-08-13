@@ -1,6 +1,6 @@
 # jsdocs
 
-https://callpixels.com/documentation/javascript/Callpixels.Number.html
+https://callpixels.com/documentation/javascript/v1/Callpixels.Number.html
 
 
 # Usage
