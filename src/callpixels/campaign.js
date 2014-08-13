@@ -6,6 +6,8 @@
      * @memberOf Callpixels
      * @param {Object} options
      * @param {String} options.campaign_key - Campaign key
+     * @example
+     * var campaign = new Callpixels.Campaign({ campaign_key: '67d9fb1917ae8f4eaff36831b41788c3' });
      */
     var Campaign = function (options) {
 
@@ -24,8 +26,12 @@
          * @memberOf Callpixels.Campaign
          * @function request_number
          * @instance
-         * @param {Object} tags - Numbers will be returned that match these tags
+         * @param {Object} tags - A collection of tags as key-value pairs. The number returned will match these tags.
          * @param {getNumberCallback} callback - Callback fired after the request completes.
+         * @example
+         * campaign.request_number({calling_about: 'support'}, function (number) {
+         *   alert(number.get('number'))
+         * });
          */
         self.request_number = function (tags, callback) {
             // assign the tags (this is important since it runs it through set_number_matching_tags)
@@ -41,7 +47,6 @@
         /**
          * Callpixels.Campaign#request_number callback fired after the request completes.
          * @callback getNumberCallback
-         * @param {Callpixels.Campaign} - The campaign that made the request
          * @param {Callpixels.Number} - The number that was returned
          */
 

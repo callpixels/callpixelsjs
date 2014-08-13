@@ -49,7 +49,7 @@ Add / Remove / Clear Tags
 ```javascript
 number.add_tags({'date_of_birth': '1980/01/01'});
 number.remove_tags({'date_of_birth': '1980/01/01'});
-number.clear_tags(update_dom_with_number);
+number.clear_tags();
 ```
 
 ##### Release
@@ -82,8 +82,9 @@ number.get('campaign_key');
 | ----------------- |:---------------:|:-------------------------------------------------------------------:|
 | id                | numeric         | number id                                                           |
 | campaign_key      | alpha-numeric   | campaign key                                                        |
-| formatted_number  | string          | pretty formatted number                                             |
-| number            | numeric         | numerical number                                                    |
+| formatted_number  | string          | formatted number according to national style `(866) 898-7878`       |
+| number            | string          | E.164 formatted number `+18668987878`                               |
+| plain_number      | string          | unformatted phone number digits `8668987878`                        |
 | target_open       | boolean         | does this number have targets that are available to take calls?     |
 | is_per_visitor    | boolean         | does this number track unique visitors?                             |
 | tag_values        | object          | the tags currently assigned to this number                          |
