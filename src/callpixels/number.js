@@ -6,11 +6,11 @@
      * @memberOf Callpixels
      * @param {Object} attributes - Attributes
      * @property {Object} attributes
-     * @property {Number} attributes.id
-     * @property {String} attributes.body
-     * @property {String} attributes.number
-     * @property {String} attributes.plain_number
-     * @property {String} attributes.ref
+     * @property {Number} attributes.id - The CallPixels internal number ID.
+     * @property {String} attributes.formatted_number - Nationally formatted phone number.
+     * @property {String} attributes.number - E.164 formatted phone number.
+     * @property {String} attributes.plain_number - The unformatted phone number digits.
+     * @property {Boolean} attributes.target_open - Whether there is an open, available target.
      */
     Callpixels.Number = function (options) {
 
@@ -29,6 +29,8 @@
          * @instance
          * @param {Object} tags - A collection of tags {key: 'value', tag2: 'value2'}
          * @param {Function} callback - Callback that will be fired after request.
+         * @throws Will throw an error if attempting to modify tags on a number that doesn't belong to a number pool
+         * with per-visitor numbers enabled.
          */
         self.add_tags = function (tags, callback) {
             ensure_is_per_visitor();
@@ -42,6 +44,8 @@
          * @instance
          * @param {Object} tags - A collection of tags {key: 'value', tag2: 'value2'}
          * @param {Function} callback - Callback that will be fired after request.
+         * @throws Will throw an error if attempting to modify tags on a number that doesn't belong to a number pool
+         * with per-visitor numbers enabled.
          */
         self.remove_tags = function (tags, callback) {
             ensure_is_per_visitor();
@@ -49,12 +53,14 @@
         };
 
         /**
-         * Remove tags from a number.
+         * Removes all tags with given keys from a number.
          * @memberOf Callpixels.Number
-         * @function remove_tags
+         * @function remove_tags_by_keys
          * @instance
          * @param {Array} keys - An array of keys to remove. eg: ['key1', 'key2']
          * @param {Function} callback - Callback that will be fired after request.
+         * @throws Will throw an error if attempting to modify tags on a number that doesn't belong to a number pool
+         * with per-visitor numbers enabled.
          */
         self.remove_tags_by_keys = function (keys, callback) {
             ensure_is_per_visitor();
@@ -73,6 +79,8 @@
          * @function clear_tags
          * @instance
          * @param {Function} callback - Callback that will be fired after request.
+         * @throws Will throw an error if attempting to modify tags on a number that doesn't belong to a number pool
+         * with per-visitor numbers enabled.
          */
         self.clear_tags = function (callback) {
             ensure_is_per_visitor();
@@ -100,8 +108,19 @@
          * @function initiate_call
          * @instance
          * @param {String} dial - The number to call.
-         * @param {Object} payload
+         * @param {Object} payload - A collection of tags as key-value pairs and optional secure override properties.
+         * @param {string} [payload.target_map] - A string mapping a placeholder number to a phone number.
+         * @param {string} [payload.target_map_cs] - A SHA1 checksum of the target_map concatenated with your CallPixels API
+         * key.
+         * @param {number} [payload.timer_offset] - Number of seconds to offset the "connect" duration timers by.
+         * @param {string} [payload.timer_offset_cs] - An SHA1 checksum of the timer_offset concatenated with your
+         * CallPixels API key.
+         * @param {(string|number)} [payload.*] - Key value pairs treated as tags.
          * @param {Function} callback - Callback that will be fired after request.
+         * @example
+         * number.initiate_call('4166686980', {company_name: 'CallPixels'}, function (call) {
+         *     alert('Call started with UUID ' + call.uuid)
+         * });
          */
         self.initiate_call = function (dial, payload, callback) {
             if (typeof(payload) === 'undefined') payload = {};
