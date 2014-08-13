@@ -25,7 +25,7 @@
   "licenses": [
     {
       "type": "GPLv3",
-      "url": "http://github.com/callpixels/callpixelsjs/blob/master/LICENSE.txt"
+      "url": "http://github.com/callpixels/callpixelsjs/blob/master/LICENSE"
     }
   ],
   "main": "src/package.js",
