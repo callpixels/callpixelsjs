@@ -1,0 +1,7 @@
+//= require 'callpixels/base/helpers'
+//= require 'callpixels/base/cookies'
+//= require 'callpixels/base/base64'
+//= require 'callpixels/base/data'
+//= require 'callpixels/base/model'
+//= require 'callpixels/base/request'
+//= require 'callpixels/base/request_number'
