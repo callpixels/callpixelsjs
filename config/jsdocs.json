@@ -4,6 +4,7 @@
     },
     "source": {
         "include": [
+            "config/README",
             "src/callpixels/number.js",
             "src/callpixels/campaign.js"
         ],
