@@ -1,13 +1,116 @@
-//= require callpixels/base
-//= require callpixels/cache
-//= require callpixels/number
-//= require callpixels/campaign;//= require 'callpixels/base/helpers'
-//= require 'callpixels/base/cookies'
-//= require 'callpixels/base/base64'
-//= require 'callpixels/base/data'
-//= require 'callpixels/base/model'
-//= require 'callpixels/base/request'
-//= require 'callpixels/base/request_number';// http://www.webtoolkit.info/javascript-base64.html#.U-qwzYBdUwQ
+(function () {
+    // ensure namespace is present
+    if (typeof window.Callpixels === 'undefined') window.Callpixels = {};
+    var Base = {};
+    // define helpers
+    Base.assert_required_keys = function () {
+        var args = Array.prototype.slice.call(arguments);
+        var object = args.shift();
+        for (var i = 0; i < args.length; i++) {
+            var key = args[i];
+            if (typeof object === 'undefined' || typeof object[key] === 'undefined') {
+                throw  "ArgumentError: Required keys are not defined: " + args.join(', ');
+            }
+        }
+        return object;
+    };
+    Base.merge = function (obj1, obj2) {
+        for (var p in obj2) {
+            try {
+                if (obj2[p].constructor == Object) {
+                    obj1[p] = Base.merge(obj1[p], obj2[p]);
+                } else {
+                    obj1[p] = obj2[p];
+                }
+            } catch (e) {
+                obj1[p] = obj2[p];
+            }
+        }
+        return obj1;
+    };
+    Base.isArray = function (arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+    Base.ieVersion = function () {
+        if (Base._ieVersion == null) {
+            Base._ieVersion = (function () {
+                var v = 3,
+                    div = document.createElement('div'),
+                    all = div.getElementsByTagName('i');
+
+                while (
+                    div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
+                        all[0]
+                    ) {
+                }
+                return v > 4 ? v : false;
+            }());
+        }
+        if (Base._ieVersion == 6 || Base._ieVersion == 7) {
+            if (Callpixels['easyxdm_loaded'] == null) Callpixels['easyxdm_loaded'] = false;
+        }
+        return Base._ieVersion;
+    };
+    Callpixels.Base = Base;
+})();;// https://github.com/evertton/cookiejs
+(function (f) {
+    var a = function (b, c, d) {
+        return 1 === arguments.length ? a.get(b) : a.set(b, c, d)
+    };
+    a._document = document;
+    a._navigator = navigator;
+    a.defaults = {path: "/"};
+    a.get = function (b) {
+        a._cachedDocumentCookie !== a._document.cookie && a._renewCache();
+        return a._cache[b]
+    };
+    a.set = function (b, c, d) {
+        d = a._getExtendedOptions(d);
+        a._document.cookie = a._generateCookieString(b, c, d);
+        return a
+    };
+    a._getExtendedOptions = function (b) {
+        return{path: b && b.path || a.defaults.path, domain: b && b.domain || a.defaults.domain, secure: b && b.secure !== f ? b.secure :
+            a.defaults.secure}
+    };
+    a._isValidDate = function (a) {
+        return"[object Date]" === Object.prototype.toString.call(a) && !isNaN(a.getTime())
+    };
+    a._generateCookieString = function (a, c, d) {
+        a = encodeURIComponent(a);
+        c = (c + "").replace(/[^!#$&-+\--:<-\[\]-~]/g, encodeURIComponent);
+        d = d || {};
+        a = a + "=" + c + (d.path ? ";path=" + d.path : "");
+        a += d.domain ? ";domain=" + d.domain : "";
+        return a += d.secure ? ";secure" : ""
+    };
+    a._getCookieObjectFromString = function (b) {
+        var c = {};
+        b = b ? b.split("; ") : [];
+        for (var d = 0; d < b.length; d++) {
+            var e = a._getKeyValuePairFromCookieString(b[d]);
+            c[e.key] === f && (c[e.key] = e.value)
+        }
+        return c
+    };
+    a._getKeyValuePairFromCookieString = function (a) {
+        var c = a.indexOf("="), c = 0 > c ? a.length : c;
+        return{key: decodeURIComponent(a.substr(0, c)), value: decodeURIComponent(a.substr(c + 1))}
+    };
+    a._renewCache = function () {
+        a._cache = a._getCookieObjectFromString(a._document.cookie);
+        a._cachedDocumentCookie = a._document.cookie
+    };
+    a._areEnabled = function () {
+        return a._navigator.cookieEnabled || "1" === a.set("cookies.js", 1).get("cookies.js")
+    };
+    a.enabled = a._areEnabled();
+    "function" === typeof define &&
+    define.amd ? define(function () {
+        return a
+    }) : "undefined" !== typeof exports ? ("undefined" !== typeof module && module.exports && (exports = module.exports = a), exports.Cookies = a) : a;
+    Callpixels.Base.Cookies = a;
+})();;// http://www.webtoolkit.info/javascript-base64.html#.U-qwzYBdUwQ
 (function () {
     var Base64 = {
         _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -132,64 +235,6 @@
         return string;
     };
     Callpixels.Base.Base64 = Base64;
-})();;// https://github.com/evertton/cookiejs
-(function (f) {
-    var a = function (b, c, d) {
-        return 1 === arguments.length ? a.get(b) : a.set(b, c, d)
-    };
-    a._document = document;
-    a._navigator = navigator;
-    a.defaults = {path: "/"};
-    a.get = function (b) {
-        a._cachedDocumentCookie !== a._document.cookie && a._renewCache();
-        return a._cache[b]
-    };
-    a.set = function (b, c, d) {
-        d = a._getExtendedOptions(d);
-        a._document.cookie = a._generateCookieString(b, c, d);
-        return a
-    };
-    a._getExtendedOptions = function (b) {
-        return{path: b && b.path || a.defaults.path, domain: b && b.domain || a.defaults.domain, secure: b && b.secure !== f ? b.secure :
-            a.defaults.secure}
-    };
-    a._isValidDate = function (a) {
-        return"[object Date]" === Object.prototype.toString.call(a) && !isNaN(a.getTime())
-    };
-    a._generateCookieString = function (a, c, d) {
-        a = encodeURIComponent(a);
-        c = (c + "").replace(/[^!#$&-+\--:<-\[\]-~]/g, encodeURIComponent);
-        d = d || {};
-        a = a + "=" + c + (d.path ? ";path=" + d.path : "");
-        a += d.domain ? ";domain=" + d.domain : "";
-        return a += d.secure ? ";secure" : ""
-    };
-    a._getCookieObjectFromString = function (b) {
-        var c = {};
-        b = b ? b.split("; ") : [];
-        for (var d = 0; d < b.length; d++) {
-            var e = a._getKeyValuePairFromCookieString(b[d]);
-            c[e.key] === f && (c[e.key] = e.value)
-        }
-        return c
-    };
-    a._getKeyValuePairFromCookieString = function (a) {
-        var c = a.indexOf("="), c = 0 > c ? a.length : c;
-        return{key: decodeURIComponent(a.substr(0, c)), value: decodeURIComponent(a.substr(c + 1))}
-    };
-    a._renewCache = function () {
-        a._cache = a._getCookieObjectFromString(a._document.cookie);
-        a._cachedDocumentCookie = a._document.cookie
-    };
-    a._areEnabled = function () {
-        return a._navigator.cookieEnabled || "1" === a.set("cookies.js", 1).get("cookies.js")
-    };
-    a.enabled = a._areEnabled();
-    "function" === typeof define &&
-    define.amd ? define(function () {
-        return a
-    }) : "undefined" !== typeof exports ? ("undefined" !== typeof module && module.exports && (exports = module.exports = a), exports.Cookies = a) : a;
-    Callpixels.Base.Cookies = a;
 })();;(function () {
     // Dependencies
     var Base = Callpixels.Base;
@@ -270,60 +315,6 @@
     };
     Data._store = {};
     Callpixels.Base.Data = Data;
-})();;(function () {
-    // ensure namespace is present
-    if (typeof window.Callpixels === 'undefined') window.Callpixels = {};
-    var Base = {};
-    // define helpers
-    Base.assert_required_keys = function () {
-        var args = Array.prototype.slice.call(arguments);
-        var object = args.shift();
-        for (var i = 0; i < args.length; i++) {
-            var key = args[i];
-            if (typeof object === 'undefined' || typeof object[key] === 'undefined') {
-                throw  "ArgumentError: Required keys are not defined: " + args.join(', ');
-            }
-        }
-        return object;
-    };
-    Base.merge = function (obj1, obj2) {
-        for (var p in obj2) {
-            try {
-                if (obj2[p].constructor == Object) {
-                    obj1[p] = Base.merge(obj1[p], obj2[p]);
-                } else {
-                    obj1[p] = obj2[p];
-                }
-            } catch (e) {
-                obj1[p] = obj2[p];
-            }
-        }
-        return obj1;
-    };
-    Base.isArray = function (arg) {
-        return Object.prototype.toString.call(arg) === '[object Array]';
-    };
-    Base.ieVersion = function () {
-        if (Base._ieVersion == null) {
-            Base._ieVersion = (function () {
-                var v = 3,
-                    div = document.createElement('div'),
-                    all = div.getElementsByTagName('i');
-
-                while (
-                    div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
-                        all[0]
-                    ) {
-                }
-                return v > 4 ? v : false;
-            }());
-        }
-        if (Base._ieVersion == 6 || Base._ieVersion == 7) {
-            if (Callpixels['easyxdm_loaded'] == null) Callpixels['easyxdm_loaded'] = false;
-        }
-        return Base._ieVersion;
-    };
-    Callpixels.Base = Base;
 })();;(function () {
     // Dependencies
     var Base = Callpixels.Base;
@@ -847,99 +838,17 @@
 
 ;window.Callpixels.Cache = {};;(function () {
     // Dependencies
-    var RequestNumber = Callpixels.Base.RequestNumber;
-    /**
-     * @constructor
-     * @memberOf Callpixels
-     * @param {Object} options
-     * @param {String} options.campaign_key - Campaign key
-     */
-    var Campaign = function (options) {
-
-        function initialize(data) {
-            // initialize data store
-            self.store(data);
-        }
-
-        var self = this;
-        self.type = 'campaigns';
-        self.primary_key('campaign_key');
-        self.numbers = [];
-
-        /**
-         * Fetch a campaign number.
-         * @memberOf Callpixels.Campaign
-         * @function request_number
-         * @instance
-         * @param {Object} tags - Numbers will be returned that match these tags
-         * @param {getNumberCallback} callback - Callback fired after the request completes.
-         */
-        self.request_number = function (tags, callback) {
-            // assign the tags (this is important since it runs it through set_number_matching_tags)
-            self.set('number_matching_tags', tags);
-            // request the number
-            new RequestNumber(self.get('campaign_key', 'number_matching_tags')).perform(function (data) {
-                // initialize number
-                var number = new Callpixels.Number(data.number);
-                // call callback
-                callback.apply(self, [number]);
-            });
-        };
-        /**
-         * Callpixels.Campaign#request_number callback fired after the request completes.
-         * @callback getNumberCallback
-         * @param {Callpixels.Campaign} - The campaign that made the request
-         * @param {Callpixels.Number} - The number that was returned
-         */
-
-        self.numbers = function () {
-            var output = [];
-            if (typeof(Callpixels.Base.Data._store) !== 'undefined') {
-                // get numbers
-                var numbers = Callpixels.Base.Data._store['numbers'];
-                // present?
-                if (typeof(numbers) !== 'undefined') {
-                    // collect numbers matching this campaign
-                    for (var primary_key in numbers) {
-                        var number = numbers[primary_key];
-                        if (self.get('campaign_key') == number.campaign_key) {
-                            output.push(new Callpixels.Number(number));
-                        }
-                    }
-                }
-            }
-            return output;
-        };
-
-        self.set_number_matching_tags = function (tags) {
-            if (typeof(tags) === 'string') {
-                tags = Callpixels.Number.extract_tags_from_string(tags);
-            }
-            if (tags && (typeof tags === "object") && !(tags instanceof Array)) {
-                return tags
-            }
-            else {
-                throw "ArgumentError: Expected number_matching_tags to be an object. eg: {tag: 'value'}";
-            }
-        };
-
-        initialize(options);
-    };
-    Campaign.prototype = new Callpixels.Base.Model();
-    Callpixels.Campaign = Campaign;
-})();;(function () {
-    // Dependencies
     var Base = Callpixels.Base;
     /**
      * @constructor
      * @memberOf Callpixels
      * @param {Object} attributes - Attributes
      * @property {Object} attributes
-     * @property {Number} attributes.id
-     * @property {String} attributes.body
-     * @property {String} attributes.number
-     * @property {String} attributes.plain_number
-     * @property {String} attributes.ref
+     * @property {Number} attributes.id - The CallPixels internal number ID.
+     * @property {String} attributes.formatted_number - Nationally formatted phone number.
+     * @property {String} attributes.number - E.164 formatted phone number.
+     * @property {String} attributes.plain_number - The unformatted phone number digits.
+     * @property {Boolean} attributes.target_open - Whether there is an open, available target.
      */
     Callpixels.Number = function (options) {
 
@@ -958,6 +867,8 @@
          * @instance
          * @param {Object} tags - A collection of tags {key: 'value', tag2: 'value2'}
          * @param {Function} callback - Callback that will be fired after request.
+         * @throws Will throw an error if attempting to modify tags on a number that doesn't belong to a number pool
+         * with per-visitor numbers enabled.
          */
         self.add_tags = function (tags, callback) {
             ensure_is_per_visitor();
@@ -971,6 +882,8 @@
          * @instance
          * @param {Object} tags - A collection of tags {key: 'value', tag2: 'value2'}
          * @param {Function} callback - Callback that will be fired after request.
+         * @throws Will throw an error if attempting to modify tags on a number that doesn't belong to a number pool
+         * with per-visitor numbers enabled.
          */
         self.remove_tags = function (tags, callback) {
             ensure_is_per_visitor();
@@ -978,12 +891,14 @@
         };
 
         /**
-         * Remove tags from a number.
+         * Removes all tags with given keys from a number.
          * @memberOf Callpixels.Number
-         * @function remove_tags
+         * @function remove_tags_by_keys
          * @instance
          * @param {Array} keys - An array of keys to remove. eg: ['key1', 'key2']
          * @param {Function} callback - Callback that will be fired after request.
+         * @throws Will throw an error if attempting to modify tags on a number that doesn't belong to a number pool
+         * with per-visitor numbers enabled.
          */
         self.remove_tags_by_keys = function (keys, callback) {
             ensure_is_per_visitor();
@@ -1002,6 +917,8 @@
          * @function clear_tags
          * @instance
          * @param {Function} callback - Callback that will be fired after request.
+         * @throws Will throw an error if attempting to modify tags on a number that doesn't belong to a number pool
+         * with per-visitor numbers enabled.
          */
         self.clear_tags = function (callback) {
             ensure_is_per_visitor();
@@ -1029,8 +946,19 @@
          * @function initiate_call
          * @instance
          * @param {String} dial - The number to call.
-         * @param {Object} payload
+         * @param {Object} payload - A collection of tags as key-value pairs and optional secure override properties.
+         * @param {string} [payload.target_map] - A string mapping a placeholder number to a phone number.
+         * @param {string} [payload.target_map_cs] - A SHA1 checksum of the target_map concatenated with your CallPixels API
+         * key.
+         * @param {number} [payload.timer_offset] - Number of seconds to offset the "connect" duration timers by.
+         * @param {string} [payload.timer_offset_cs] - An SHA1 checksum of the timer_offset concatenated with your
+         * CallPixels API key.
+         * @param {(string|number)} [payload.*] - Key value pairs treated as tags.
          * @param {Function} callback - Callback that will be fired after request.
+         * @example
+         * number.initiate_call('4166686980', {company_name: 'CallPixels'}, function (call) {
+         *     alert('Call started with UUID ' + call.uuid)
+         * });
          */
         self.initiate_call = function (dial, payload, callback) {
             if (typeof(payload) === 'undefined') payload = {};
@@ -1108,4 +1036,91 @@
     // always ping active numbers
     ping_active_numbers();
 
+})();;(function () {
+    // Dependencies
+    var RequestNumber = Callpixels.Base.RequestNumber;
+    /**
+     * @constructor
+     * @memberOf Callpixels
+     * @param {Object} options
+     * @param {String} options.campaign_key - Campaign key
+     * @example
+     * var campaign = new Callpixels.Campaign({ campaign_key: '67d9fb1917ae8f4eaff36831b41788c3' });
+     */
+    var Campaign = function (options) {
+
+        function initialize(data) {
+            // initialize data store
+            self.store(data);
+        }
+
+        var self = this;
+        self.type = 'campaigns';
+        self.primary_key('campaign_key');
+        self.numbers = [];
+
+        /**
+         * Fetch a campaign number.
+         * @memberOf Callpixels.Campaign
+         * @function request_number
+         * @instance
+         * @param {Object} tags - A collection of tags as key-value pairs. The number returned will match these tags.
+         * @param {getNumberCallback} callback - Callback fired after the request completes.
+         * @example
+         * campaign.request_number({calling_about: 'support'}, function (number) {
+         *   alert(number.get('number'))
+         * });
+         */
+        self.request_number = function (tags, callback) {
+            // assign the tags (this is important since it runs it through set_number_matching_tags)
+            self.set('number_matching_tags', tags);
+            // request the number
+            new RequestNumber(self.get('campaign_key', 'number_matching_tags')).perform(function (data) {
+                // initialize number
+                var number = new Callpixels.Number(data.number);
+                // call callback
+                callback.apply(self, [number]);
+            });
+        };
+        /**
+         * Callpixels.Campaign#request_number callback fired after the request completes.
+         * @callback getNumberCallback
+         * @param {Callpixels.Number} - The number that was returned
+         */
+
+        self.numbers = function () {
+            var output = [];
+            if (typeof(Callpixels.Base.Data._store) !== 'undefined') {
+                // get numbers
+                var numbers = Callpixels.Base.Data._store['numbers'];
+                // present?
+                if (typeof(numbers) !== 'undefined') {
+                    // collect numbers matching this campaign
+                    for (var primary_key in numbers) {
+                        var number = numbers[primary_key];
+                        if (self.get('campaign_key') == number.campaign_key) {
+                            output.push(new Callpixels.Number(number));
+                        }
+                    }
+                }
+            }
+            return output;
+        };
+
+        self.set_number_matching_tags = function (tags) {
+            if (typeof(tags) === 'string') {
+                tags = Callpixels.Number.extract_tags_from_string(tags);
+            }
+            if (tags && (typeof tags === "object") && !(tags instanceof Array)) {
+                return tags
+            }
+            else {
+                throw "ArgumentError: Expected number_matching_tags to be an object. eg: {tag: 'value'}";
+            }
+        };
+
+        initialize(options);
+    };
+    Campaign.prototype = new Callpixels.Base.Model();
+    Callpixels.Campaign = Campaign;
 })();

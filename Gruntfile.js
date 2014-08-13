@@ -7,7 +7,18 @@ module.exports = function(grunt) {
         separator: ';'
       },
       dist: {
-        src: ['src/**/*.js'],
+        src: [
+        'src/callpixels/base/helpers.js',
+        'src/callpixels/base/cookies.js',
+        'src/callpixels/base/base64.js',
+        'src/callpixels/base/data.js',
+        'src/callpixels/base/model.js',
+        'src/callpixels/base/request.js',
+        'src/callpixels/base/request_number.js',
+        'src/callpixels/cache.js',
+        'src/callpixels/number.js',
+        'src/callpixels/campaign.js'
+        ],
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -18,18 +29,6 @@ module.exports = function(grunt) {
       dist: {
         files: {
           'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
-        }
-      }
-    },
-    jshint: {
-      files: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
-      options: {
-        // options here to override JSHint defaults
-        globals: {
-          jQuery: true,
-          console: true,
-          module: true,
-          document: true
         }
       }
     },
@@ -45,5 +44,4 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
 
   grunt.registerTask('default', ['concat','uglify']);
-
 };
