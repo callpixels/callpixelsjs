@@ -1,26 +1,16 @@
 require "bundler/gem_tasks"
 require 'fileutils'
+require_relative 'lib/callpixelsjs/compile.rb'
 
-namespace :jsdocs do
-  desc "compile jsdocs"
+namespace :callpixelsjs do
+  desc "compile callpixelsjs"
   task :compile do
-    %x{./node_modules/.bin/jsdoc -c config/jsdocs.json}
-  end
-end
-
-namespace :grunt do
-  desc "compile src js files"
-  task :compile do
-    %x{grunt}
-    FileUtils.rm_rf('vendor')
-    FileUtils.mkdir_p('vendor/assets/javascripts/', )
-    Dir.glob('dist/*.js'){|f| FileUtils.cp( f, 'vendor/assets/javascripts/') }
+    Callpixelsjs::Compile.perform
   end
 end
 
 task :before_build do
-  Rake::Task["grunt:compile"].execute
-  Rake::Task["jsdocs:compile"].execute
+  Rake::Task["callpixelsjs:compile"].execute
 end
 
 task :build => :before_build
