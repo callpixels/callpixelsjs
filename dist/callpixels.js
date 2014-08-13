@@ -7,7 +7,8 @@
 //= require 'callpixels/base/data'
 //= require 'callpixels/base/model'
 //= require 'callpixels/base/request'
-//= require 'callpixels/base/request_number';(function () {
+//= require 'callpixels/base/request_number';// http://www.webtoolkit.info/javascript-base64.html#.U-qwzYBdUwQ
+(function () {
     var Base64 = {
         _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
     };
@@ -131,7 +132,8 @@
         return string;
     };
     Callpixels.Base.Base64 = Base64;
-})();;(function (f) {
+})();;// https://github.com/evertton/cookiejs
+(function (f) {
     var a = function (b, c, d) {
         return 1 === arguments.length ? a.get(b) : a.set(b, c, d)
     };
@@ -288,7 +290,7 @@
         for (var p in obj2) {
             try {
                 if (obj2[p].constructor == Object) {
-                    obj1[p] = MergeRecursive(obj1[p], obj2[p]);
+                    obj1[p] = Base.merge(obj1[p], obj2[p]);
                 } else {
                     obj1[p] = obj2[p];
                 }
@@ -851,7 +853,6 @@
      * @memberOf Callpixels
      * @param {Object} options
      * @param {String} options.campaign_key - Campaign key
-     * @param {Object} [options.number_matching_tags] - Numbers will be returned that match these tags
      */
     var Campaign = function (options) {
 
@@ -870,9 +871,13 @@
          * @memberOf Callpixels.Campaign
          * @function request_number
          * @instance
+         * @param {Object} tags - Numbers will be returned that match these tags
          * @param {getNumberCallback} callback - Callback fired after the request completes.
          */
-        self.request_number = function (callback) {
+        self.request_number = function (tags, callback) {
+            // assign the tags (this is important since it runs it through set_number_matching_tags)
+            self.set('number_matching_tags', tags);
+            // request the number
             new RequestNumber(self.get('campaign_key', 'number_matching_tags')).perform(function (data) {
                 // initialize number
                 var number = new Callpixels.Number(data.number);
@@ -924,6 +929,7 @@
     Callpixels.Campaign = Campaign;
 })();;(function () {
     // Dependencies
+    var Base = Callpixels.Base;
     /**
      * @constructor
      * @memberOf Callpixels
@@ -972,6 +978,25 @@
         };
 
         /**
+         * Remove tags from a number.
+         * @memberOf Callpixels.Number
+         * @function remove_tags
+         * @instance
+         * @param {Array} keys - An array of keys to remove. eg: ['key1', 'key2']
+         * @param {Function} callback - Callback that will be fired after request.
+         */
+        self.remove_tags_by_keys = function (keys, callback) {
+            ensure_is_per_visitor();
+            if (typeof(keys) === 'string') keys = keys.split(',');
+            var payload = {
+                tag_keys: keys,
+                ids: [ get('id') ],
+                campaign_key: get('campaign_key')
+            };
+            self.post_data('numbers/untag/keys', payload, callback);
+        };
+
+        /**
          * Clear all tags from a number.
          * @memberOf Callpixels.Number
          * @function clear_tags
@@ -996,6 +1021,25 @@
          */
         self.release = function () {
             self.set('is_active', 'false');
+        };
+
+        /**
+         * Start a call immediately by having a campaign target dial the visitor.
+         * @memberOf Callpixels.Number
+         * @function initiate_call
+         * @instance
+         * @param {String} dial - The number to call.
+         * @param {Object} payload
+         * @param {Function} callback - Callback that will be fired after request.
+         */
+        self.initiate_call = function (dial, payload, callback) {
+            if (typeof(payload) === 'undefined') payload = {};
+            // assign dial to payload
+            payload.dial = dial;
+            // merge payload into payload
+            payload = Base.merge(self.get('id', 'campaign_key'), payload);
+            // post the payload
+            self.post_data('numbers/initiate_call', payload, callback);
         };
 
         function tags_payload(tags) {
