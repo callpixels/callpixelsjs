@@ -177,15 +177,20 @@
                 for (var primary_key in numbers) {
                     var number = numbers[primary_key];
                     if (number.is_active === 'true') {
-                        if (typeof(grouped[number.campaign_key]) === 'undefined') grouped[number.campaign_key] = [];
-                        grouped[number.campaign_key].push(number.id);
+                        if (typeof(grouped[number.campaign_key]) === 'undefined'){
+                          grouped[number.campaign_key] = [];
+                          grouped[number.campaign_key]['ids'] = [];
+                          grouped[number.campaign_key]['hashes'] = [];
+                        }
+                        grouped[number.campaign_key]['ids'].push(number.id);
+                        grouped[number.campaign_key]['hashes'].push(number.id_as_hash);
                     }
                 }
                 // ping each group of number_ids
                 for (var campaign_key in grouped) {
                     var payload = {
-                        campaign_key: campaign_key,
-                        ids: grouped[campaign_key]
+                        ids: grouped[campaign_key].ids,
+                        hashes: grouped[campaign_key].hashes
                     };
                     Callpixels.Base.Request.connection().postJSON('/api/v1/numbers/ping', payload, [Callpixels.Base.Model.update, callback], this);
                 }
