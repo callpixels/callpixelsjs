@@ -1021,7 +1021,7 @@
                           grouped[number.campaign_key]['hashes'] = [];
                         }
                         grouped[number.campaign_key]['ids'].push(number.id);
-                        grouped[number.campaign_key]['hashes'].push(number.id_as_hash);
+                        grouped[number.campaign_key]['hashes'].push(number.id_checksum);
                     }
                 }
                 // ping each group of number_ids
