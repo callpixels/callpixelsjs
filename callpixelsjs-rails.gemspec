@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{callpixels.js rails wrapper}
   spec.description   = %q{callpixels.js rails wrapper}
   spec.homepage      = ""
-  spec.license       = "MIT"
+  spec.license       = "GPLv3"
 
   spec.files = Dir["{lib,vendor}/**/*"] + ["LICENSE", "README.md"]  
   
