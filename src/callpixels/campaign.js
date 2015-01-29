@@ -27,21 +27,31 @@
          * @function request_number
          * @instance
          * @param {Object} tags - A collection of tags as key-value pairs. The number returned will match these tags.
-         * @param {getNumberCallback} callback - Callback fired after the request completes.
+         * @param {getNumberCallback} callback - Callback fired if the request completes successfully.
+         * @param {Function} error_callback - Callback fired if the request raises an error.
          * @example
          * campaign.request_number({calling_about: 'support'}, function (number) {
          *   alert(number.get('number'))
-         * });
+         * }, function(response){
+         *   alert('something went wrong: ' + response);
+         * };
          */
-        self.request_number = function (tags, callback) {
+        self.request_number = function (tags, callback, error_callback) {
             // assign the tags (this is important since it runs it through set_number_matching_tags)
             self.set('number_matching_tags', tags);
             // request the number
             new RequestNumber(self.get('campaign_key', 'number_matching_tags')).perform(function (data) {
-                // initialize number
-                var number = new Callpixels.Number(data.number);
-                // call callback
-                callback.apply(self, [number]);
+                // did callpixels return a valid number?
+                if (typeof(data) !== 'undefined' && typeof(data.number) !== 'undefined' && data.number !== '') {
+                    // initialize number
+                    var number = new Callpixels.Number(data.number);
+                    // call callback
+                    callback.apply(self, [number]);
+                }
+                // otherwise fire the error callback
+                else if (typeof(error_callback) === 'function') {
+                    error_callback.apply(self, [data]);
+                }
             });
         };
         /**

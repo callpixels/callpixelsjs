@@ -148,9 +148,7 @@
                     request.send();
                 }
 
-                if (request.status === 200) {
-                    runCallbacks(request.responseText);
-                }
+                runCallbacks(request.responseText);
             }
         };
 
