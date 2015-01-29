@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = ""
   spec.license       = "GPLv3"
 
-  spec.files = Dir["{lib,config,vendor}/**/*"] + ["LICENSE", "README.md"] + [
+  spec.files = Dir["{lib,config,vendor,src}/**/*"] + ["LICENSE", "README.md"] + [
       'Gruntfile.js', 'LICENSE', 'package.json', 'Rakefile', 'README.md']
   
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
