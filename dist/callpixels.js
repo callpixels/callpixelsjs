@@ -1078,6 +1078,16 @@
          * };
          */
         self.request_number = function (tags, callback, error_callback) {
+            // if the first argument is a function, the user has decided to skip passing tags
+            // therefore cascade the arguments upwards so that everything works as expected
+            if (typeof(tags) === 'function'){
+                // argument 3 becomes argument 2
+                error_callback = callback;
+                // argument 2 becomes argument 1
+                callback = tags;
+                // argument 1 becomes an empty tags object
+                tags = {};
+            }
             // assign the tags (this is important since it runs it through set_number_matching_tags)
             self.set('number_matching_tags', tags);
             // request the number
