@@ -636,7 +636,7 @@
     };
     Request.connection = function () {
         if (typeof window.Callpixels._connection === 'undefined') {
-            window.Callpixels._connection = new Callpixels.Base.Request({addr: 'callpixels.com', http_prefix: 'http', urlregex: "/\\/\\/[^\\/]*\\/(.*)/" });
+            window.Callpixels._connection = new Callpixels.Base.Request({addr: 'api.callpixels.com', http_prefix: 'http', urlregex: "/\\/\\/[^\\/]*\\/(.*)/" });
         }
         return window.Callpixels._connection;
     };
